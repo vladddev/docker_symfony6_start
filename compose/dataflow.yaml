@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+    rabbitmq:
+        image: rabbitmq:3.11.9-management-alpine
+        hostname: rabbitmq
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: any
+        environment:
+            RABBITMQ_DEFAULT_USER: admin_user
+            RABBITMQ_DEFAULT_PASS: admin_dev
+            RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+        volumes:
+            - ../var/dataflow/rabbitmq:/var/lib/rabbitmq
+        networks:
+            - demosite
+
+networks:
+    demosite:
+        external: true

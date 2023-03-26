@@ -1,0 +1,11 @@
+doctrine_migrations:
+    migrations_paths:
+        # namespace is arbitrary but should be different from App\Migrations
+        # as migrations classes should NOT be autoloaded
+        'DoctrineMigrations': '%kernel.project_dir%/migrations/Postgre'
+    enable_profiler: false
+
+    organize_migrations: BY_YEAR_AND_MONTH
+
+    services:
+        'Doctrine\Migrations\Version\MigrationFactory': 'App\Service\MigrationsFactory\MigrationFactoryDecorator'

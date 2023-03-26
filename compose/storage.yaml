@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+    db:
+        image: postgres:12-alpine
+        hostname: "db-{{.Node.Hostname}}"
+        deploy:
+            mode: replicated
+            replicas: 1 # Одна реплика потому, что в противном случае у каждой ноды будет своя БД и данные между ними не будут синхронизироваться
+            restart_policy:
+                condition: any
+        environment:
+            POSTGRES_USER: admin_user
+            POSTGRES_PASSWORD: admin_dev
+            POSTGRES_DB: postgres
+            PGDATA: /var/lib/postgresql/data/pgdata
+        networks:
+            - demosite # Сеть также нужно указать дополнительно в корневом поле networks (внизу файла)
+        volumes: # Развернутый синтаксис монтирования
+            - ../var/storage/postgres/data:/var/lib/postgresql/data
+
+    pgadmin-compose:
+        image: dpage/pgadmin4
+        environment:
+            PGADMIN_DEFAULT_EMAIL: "test@gmail.com"
+            PGADMIN_DEFAULT_PASSWORD: "test123!"
+        ports:
+            - "16543:80"
+        depends_on:
+            - db
+        networks:
+            - demosite
+
+    redis:
+        image: redis:6.2-alpine
+        command: redis-server --appendonly yes
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: any
+        volumes:
+            - ../var/storage/redis/data:/data
+        networks:
+            - demosite
+
+networks:
+    demosite:
+        external: true

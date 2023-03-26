@@ -1,0 +1,16 @@
+api_platform:
+    version: 1.0.0
+    mapping:
+        paths: [ '%kernel.project_dir%/src/Entity' ]
+    patch_formats:
+        json: [ 'application/merge-patch+json' ]
+    path_segment_name_generator: api_platform.path_segment_name_generator.dash
+    name_converter: 'Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter'
+    defaults:
+        pagination_items_per_page: 50
+    swagger:
+        versions: [ 3 ]
+        api_keys:
+            apiKey:
+                name: Authorization
+                type: header

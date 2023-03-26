@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+
+    ### wellknown #######################################################################
+    wellknown:
+        image: nginx:1.23-alpine
+        hostname: "wellknown-{{.Node.Hostname}}-{{.Task.Slot}}"
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: any
+        volumes:
+            - ../config/edge/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ../config/acme/wellknown/conf.d:/etc/nginx/conf.d:ro
+            - ../var/storage/acme/.well-known:/opt/acme/.well-known
+            - ../var/log/acme/wellknown:/var/log/nginx
+        ports:
+            - target: 80
+              published: 80
+              protocol: tcp
+        networks:
+            - demosite
+
+    ### acme #####################################################################################
+    # To issue certificates for the first time, start acme docker service and run ./ssl.sh
+    acme:
+        image: neilpang/acme.sh
+        command: daemon
+        hostname: "acme-{.Node.Hostname}}-{{.Task.Slot}}"
+        deploy:
+            mode: replicated
+            replicas: 1
+            restart_policy:
+                condition: any
+        volumes:
+            - ../var/storage/acme/acme.sh:/acme.sh
+            - ../var/storage/acme/.well-known:/opt/acme/.well-known
+            - ../var/storage/edge/gateway/certificates:/opt/certificates
+        networks:
+            - demosite
+
+### Networks Setup ############################################################
+
+networks:
+    demosite:
+        external: true

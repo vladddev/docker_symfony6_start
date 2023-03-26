@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+    php-fpm:
+        image: nissaya98/main-php:8.1-fpm-alpine-dev
+        hostname: php-fpm-{{.Node.Hostname}}-{{.Task.Slot}}
+        deploy:
+            mode: replicated # будет создано столько реплик, сколько указано ниже.
+            replicas: 1 # создастся 6 контейнеров и будут равномерно распределены по нодам
+            restart_policy:
+                condition: any # перезапускать при остановке всегда
+        networks:
+            - demosite # Сеть также нужно указать дополнительно в корневом поле networks (внизу файла)
+        volumes:
+            -   type: bind
+                source: ../config/php-fpm/local.ini
+                target: /usr/local/etc/php/conf.d/local.ini
+            -   type: bind
+                source: ../core
+                target: /var/www/html
+
+networks:
+    demosite:
+        external: true

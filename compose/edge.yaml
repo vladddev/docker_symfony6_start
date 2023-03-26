@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+    gateway:
+        image: nginx:1.23-alpine
+        hostname: "gateway-{{.Node.Hostname}}" # Шаблон для формирования названия хоста
+        deploy:
+            mode: global # на каждой ноде будет поднята одна реплика
+            restart_policy:
+                condition: any # перезапускать при остановке всегда
+        networks:
+            - demosite # Сеть также нужно указать дополнительно в корневом поле networks (внизу файла)
+        ports:
+            -   target: 443
+                published: 443
+                protocol: tcp
+                mode: host
+        volumes: # Развернутый синтаксис монтирования
+            -   type: bind
+                source: ../config/edge/conf.d
+                target: /etc/nginx/conf.d
+            -   type: bind
+                source: ../config/edge/error_pages
+                target: /etc/nginx/error_pages
+            -   type: bind
+                source: ../config/edge/ssl
+                target: /etc/nginx/ssl
+            -   type: bind
+                source: ../var/storage/edge/gateway/certificates
+                target: /etc/nginx/certificates
+            -   type: bind
+                source: ../core
+                target: /var/www/html
+            -   type: bind
+                source: ../var/edge
+                target: /var/log
+
+# Указываем созданную вручную сеть
+networks:
+    demosite:
+        external: true # Отметка о том, что сеть создается вручную
